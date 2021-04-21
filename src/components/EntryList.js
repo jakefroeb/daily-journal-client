@@ -27,7 +27,7 @@ export const EntryList = () => {
 
 
   const filterAllEntries = (event) => {
-    const filteredEntriesByMood = entries.filter(entry => entry.moodId === parseInt(event.target.value))
+    const filteredEntriesByMood = entries.filter(entry => entry.mood_id === parseInt(event.target.value))
     setEntries(filteredEntriesByMood)
     setMoodSelected(parseInt(event.target.value))
   }
@@ -74,7 +74,7 @@ export const EntryList = () => {
 
       <div className="entries">
         {filteredEntries.map(entry => {
-          return <Entry key={entry.id} entry={entry} moods={moods} />;
+          return <Entry key={entry.id} entry={entry} />;
         })}
       </div>
 

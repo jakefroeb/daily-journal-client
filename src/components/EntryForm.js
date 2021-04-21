@@ -5,12 +5,12 @@ import { MoodContext } from "./mood/MoodProvider"
 
 export const EntryForm = (props) => {
     const { addEntry, updateEntry, entry, setEntry } = useContext(EntryContext)
-    const { moods, getMoods } = useContext(MoodContext)
+    const { moods, getMoods, tags, getTags } = useContext(MoodContext)
 
     const [editMode, editModeChanged] = useState(false)
 
     useEffect(() => {
-        getMoods()
+        getMoods().then(getTags)
     }, [])
 
     useEffect(() => {
@@ -28,7 +28,25 @@ export const EntryForm = (props) => {
             and change state instead of modifying current one
         */
         const newEntry = Object.assign({}, entry)
-        newEntry[event.target.name] = event.target.value
+        if(!newEntry.tags){
+            newEntry.tags = []
+        }
+        if(event.target.name === "check"){
+            console.log(event.target.value)
+            let deletedTag = false
+            newEntry.tags.forEach(t => {
+                if(t === parseInt(event.target.value)){
+                    newEntry.tags.splice(newEntry.tags.indexOf(t),1)
+                    deletedTag = true
+                }
+                })
+            if(!deletedTag){
+                newEntry.tags.push(parseInt(event.target.value))
+            }
+        }else{
+            newEntry[event.target.name] = event.target.value
+        }
+        console.log(newEntry)
         setEntry(newEntry)
     }
 
@@ -42,17 +60,19 @@ export const EntryForm = (props) => {
                 concept: entry.concept,
                 entry: entry.entry,
                 date: entry.date,
-                moodId: parseInt(entry.moodId)
+                mood_id: parseInt(entry.mood_id),
+                tags : entry.tags
             })
-        } else {
+        } else {   
             addEntry({
                 concept: entry.concept,
                 entry: entry.entry,
-                date: Date.now(),
-                moodId: parseInt(entry.moodId)
+                date: new Date().toISOString().slice(0, 10),
+                mood_id: parseInt(entry.mood_id),
+                tags : entry.tags
             })
         }
-        setEntry({ concept: "", entry: "", moodId: 0 })
+        setEntry({ concept: "", entry: "", mood_id: 0, tags: [] })
     }
 
     return (
@@ -82,10 +102,10 @@ export const EntryForm = (props) => {
             </fieldset>
             <fieldset>
                 <div className="form-group">
-                    <label htmlFor="moodId">Mood: </label>
-                    <select name="moodId" className="form-control"
+                    <label htmlFor="mood_id">Mood: </label>
+                    <select name="mood_id" className="form-control"
                         proptype="int"
-                        value={entry.moodId}
+                        value={entry.mood_id}
                         onChange={handleControlledInputChange}>
 
                         <option value="0">Select a mood</option>
@@ -95,6 +115,16 @@ export const EntryForm = (props) => {
                             </option>
                         ))}
                     </select>
+                </div>
+            </fieldset>
+            <fieldset>
+                <div className="form-group">
+                    {tags.map(t =>
+                        <>
+                            <label htmlFor={t.name}>{t.name}</label>
+                            <input name="check" type="checkbox" id={t.id} onChange={handleControlledInputChange} checked={entry.tags?.includes(t.id)} value= {t.id}/>
+                        </>
+                    )}
                 </div>
             </fieldset>
             <button type="submit"

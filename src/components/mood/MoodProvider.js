@@ -11,17 +11,23 @@ export const MoodContext = React.createContext();
  */
 export const MoodProvider = props => {
   const [moods, setMoods] = useState([]);
+  const [tags, setTags] = useState([])
 
   const getMoods = () => {
     return fetch("http://localhost:8088/moods")
       .then(res => res.json())
       .then(setMoods);
   };
+  const getTags = () => {
+    return fetch("http://localhost:8088/tags")
+    .then(res => res.json())
+    .then(setTags)
+  }
   return (
     <MoodContext.Provider
       value={{
         moods,
-        getMoods
+        getMoods, tags, getTags
       }}
     >
       {props.children}
